@@ -28,8 +28,7 @@ If you visit `http://localhost:3000/` by itself, you'll just get a welcome messa
 | `GET /pods?status=available` | Filters pods by status — use `available` or `occupied` |
 | `GET /pods/:id` | Returns one specific pod by its ID number; returns 404 if the ID doesn't exist |
 | `POST /pods` | Creates a new pod. Expects `location`, `category`, `hourlyRate` in the body; returns 400 if any are missing |
-| `GET /menu` | Returns menu items / nap passes list (handout compatibility) |
-| `POST /menu` | Adds a new menu item. Expects `name`, `category`, `price` in the body; returns 400 if any are missing |
+| `DELETE /pods/:id` | Deletes one pod by its ID number; returns the deleted pod, or 404 if the ID doesn't exist |
 | `GET /amenities` | Returns a list of everything included inside a pod |
 | `GET /pricing` | Returns all pricing options: hourly, daily pass, and monthly/semester memberships |
 | `GET /availability` | Returns a per-location count of total pods and how many are currently free |
@@ -138,34 +137,17 @@ If `location`, `category`, or `hourlyRate` is missing, the server responds with 
 
 ---
 
-### `GET /menu`
-Returns all available menu items / nap passes. Provided for direct compatibility with the Week 8 handout specification.
+### `DELETE /pods/:id`
+Removes one pod by its ID. Responds with the pod that was just deleted so the client can confirm what's gone.
+
+Example: `DELETE /pods/2`
 ```json
-[
-  { "id": 1, "name": "30-Min Power Nap Pass", "category": "Standard", "price": 5 },
-  { id: 2, "name": "60-Min Deep Rest Pass", "category": "Standard", "price": 10 },
-  { id: 3, "name": "All-Day Study & Nap Pass", "category": "Premium", "price": 25 }
-]
+{ "id": 2, "location": "Main Library - 2nd Floor", "status": "occupied", "category": "Basic", "hourlyRate": 5 }
 ```
 
----
-
-### `POST /menu`
-Adds a new item to the menu array. Expects a JSON body with `name`, `category`, and `price`. The server assigns an auto-incrementing `id` and returns the saved item.
-
-Request body:
+If the ID doesn't exist, the server responds with `404 Not Found`:
 ```json
-{ "name": "Overnight Recharge Pass", "category": "Premium", "price": 35 }
-```
-
-Response (`201 Created`):
-```json
-{ "id": 4, "name": "Overnight Recharge Pass", "category": "Premium", "price": 35 }
-```
-
-If `name`, `category`, or `price` is missing, the server responds with `400 Bad Request`:
-```json
-{ "error": "Missing fields" }
+{ "error": "Pod not found" }
 ```
 
 ---
@@ -255,5 +237,6 @@ Open `client.html` in a browser **while the server is running** to get a live po
 - Filter pods by category (All / Basic / Premium) without reloading the page
 - Show full details for any pod by clicking on it (fetches from `/pods/:id`)
 - Add a new pod through the **Add a New Pod** form — `POST`s to `/pods` and instantly refreshes the pod list, no page reload
+- Delete a pod with the red **Delete** button in the Pod Details panel — `DELETE`s to `/pods/:id` after a confirm prompt, then clears the panel and refreshes the list
 - Submit customer feedback through the **Leave Feedback** form — `POST`s to `/feedback`, which is timestamped server-side; visit `http://localhost:3000/feedback` directly to see all saved entries
 - Both forms surface the server's `400 Bad Request` response inline if required fields are missing
